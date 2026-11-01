@@ -1,0 +1,40 @@
+<!doctype html>
+<!--
+  Host this single file somewhere stable over https (Cloudflare Pages, Netlify, GitHub Pages...).
+  Register its full URL as an allowed redirect in your SpacetimeAuth dashboard, and put the same
+  URL in OidcAuthManager > Web Callback Url.
+-->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Signing in…</title>
+  <style>
+    body { font-family: system-ui, sans-serif; text-align: center; margin-top: 20vh; color: #222; }
+  </style>
+</head>
+<body>
+  <p id="msg">Finishing sign-in…</p>
+  <script>
+    (function () {
+      var p = new URLSearchParams(window.location.search);
+      var data = {
+        type: 'boardblast-oidc',
+        code: p.get('code') || '',
+        state: p.get('state') || '',
+        error: p.get('error_description') || p.get('error') || ''
+      };
+      var msg = document.getElementById('msg');
+
+      if (window.opener) {
+        // '*' is fine here: the code is useless without the PKCE verifier, which only the game has.
+        window.opener.postMessage(data, '*');
+        msg.textContent = 'Signed in! You can close this window and go back to the game.';
+        setTimeout(function () { window.close(); }, 600);
+      } else {
+        msg.textContent = 'Could not reach the game window. Close this tab and try signing in again.';
+      }
+    })();
+  </script>
+</body>
+</html>
